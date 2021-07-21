@@ -44,6 +44,7 @@ int main(int argc, char* argv[]){
         printf("connected with ip: %s and port: %d\n", inet_ntop(AF_INET, &client.sin_addr, remote, INET_ADDRSTRLEN), ntohs(client.sin_port));
         close(confd);
     }
+    //在unistd.h中，严格来说并不是关闭一个链接，而是将连接的引用计数减一
     close(sock);
     return 0;
 }
