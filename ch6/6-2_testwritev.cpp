@@ -65,12 +65,13 @@ int main( int argc, char* argv[] )
         }
         else
         {
-            if( S_ISDIR( file_stat.st_mode ) ) //目标文件
+            if( S_ISDIR( file_stat.st_mode ) ) //目标文件是一个目录
             {
                 valid = false;
             }
-            else if( file_stat.st_mode & S_IROTH )
+            else if( file_stat.st_mode & S_IROTH ) //当前用户有读取目标文件的权限
             {
+                //动态分配缓存区file_buf，并指定其大小为目标文件的大小file_stat.st_size+1，然后将目标文件读入缓存区file_buf中
                 int fd = open( file_name, O_RDONLY );
                 file_buf = new char [ file_stat.st_size + 1 ];
                 memset( file_buf, '\0', file_stat.st_size + 1 );
@@ -84,15 +85,16 @@ int main( int argc, char* argv[] )
                 valid = false;
             }
         }
-        
+        //如果目标文件有效，则发送正常的HTTP应答
         if( valid )
-        {
+        {   //下面这部分将HTTP应答的状态行、“Content-Length”头部字段和一个空行依次加入到header_buf中
             ret = snprintf( header_buf, BUFFER_SIZE-1, "%s %s\r\n", "HTTP/1.1", status_line[0] );
             len += ret;
             ret = snprintf( header_buf + len, BUFFER_SIZE-1-len, 
                              "Content-Length: %d\r\n", file_stat.st_size );
             len += ret;
             ret = snprintf( header_buf + len, BUFFER_SIZE-1-len, "%s", "\r\n" );
+            //利用writev将header_buf和file_buf的内容一并写出
             struct iovec iv[2];
             iv[ 0 ].iov_base = header_buf;
             iv[ 0 ].iov_len = strlen( header_buf );
@@ -101,7 +103,7 @@ int main( int argc, char* argv[] )
             ret = writev( connfd, iv, 2 );
         }
         else
-        {
+        {   //如果目标文件无效，则通知客户端发生了“内部错误”
             ret = snprintf( header_buf, BUFFER_SIZE-1, "%s %s\r\n", "HTTP/1.1", status_line[1] );
             len += ret;
             ret = snprintf( header_buf + len, BUFFER_SIZE-1-len, "%s", "\r\n" );
