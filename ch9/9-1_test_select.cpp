@@ -43,7 +43,7 @@ int main(int argc, char* argv[]){
     }
     else{
         char buf[1024];
-        fd_set read_fds;
+        fd_set read_fds;   //fd_set是仅包含一个整型数组的结构体
         fd_set exception_fds;
         FD_ZERO(&read_fds);
         FD_ZERO(&exception_fds);
@@ -51,14 +51,15 @@ int main(int argc, char* argv[]){
         while(1){
             memset(buf, '\0', sizeof(buf));
             //每次调用select前都要重新在read_fds和exception_fds中设置文件描述符confd，因为事件发生后，文件描述符集合将会被内核修改
-            FD_SET(confd, &read_fds);
+            FD_SET(confd, &read_fds); //FD_SET(int fd, fd_set *fd_set) 设置fdset的位fd
             FD_SET(confd, &exception_fds);
+            //int select(int nfds, fd_set* readfds, fd_set* writefds, fd_set* exceptionfds, struct timeval timeout)调用成功时返回就绪文件描述符的总数，失败是返回-1并设置errno，没有就绪文件描述符时返回0
             ret = select(confd+1, &read_fds, NULL, &exception_fds, NULL);
             if (ret < 0){
                 printf("selection ffailure.\n");
                 break;
             }
-            if (FD_ISSET(confd, &read_fds)){
+            if (FD_ISSET(confd, &read_fds)){  //FD_SET(int fd, fd_set *fdset)测试fdset的位fd是否被设置了
                 ret = recv(confd, buf, sizeof(buf)-1, 0); //recv返回成功读取的字节数
                 if (ret <= 0){
                     break;
