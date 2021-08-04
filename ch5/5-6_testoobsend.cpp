@@ -31,7 +31,7 @@ int main(int argc, char* argv[]){
         const char* data = "abc";
         const char* normal_data = "123";
         send(sock, normal_data, strlen(normal_data), 0);
-        send(sock, data, strlen(data), MSG_OOB); //发送或接收紧急数据
+        send(sock, data, strlen(data), MSG_OOB); //MSG_OOB发送或接收紧急数据
         send(sock, normal_data, strlen(normal_data), 0);
     }
     close(sock);
