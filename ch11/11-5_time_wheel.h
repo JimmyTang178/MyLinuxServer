@@ -139,7 +139,7 @@ class time_wheel
             else
             {
                 /* 否则说明定时器已经到期，于是执行定时任务，然后删除该定时器 */
-                tmp->cb_func(tmp->user_data);
+                tmp->cb_func(tmp->user_data); //执行定时器的任务就是执行定时器的回调函数
                 if (tmp == slots[ts])
                 {
                     printf("delete header in cur_slot\n");
